@@ -22,6 +22,10 @@ DiceScreen = DiceScreen()
 CurrentScreen = TextScreen
 --local currentScreen = DiceScreen
 
+-- Add menu items
+-- local menu = pd.getSystemMenu()
+-- menu:addOptionsMenuItem("Roll Dice", {"1","2","3","4","5"}, "2", function(number) CurrentScreen = DiceScreen; DiceScreen:roll(tonumber(number)) end)
+
 function pd.update()
     CurrentScreen:update()
 end

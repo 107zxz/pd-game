@@ -2,8 +2,8 @@ local pg = {}
 pg.buttons = {
 }
 pg.text = [[
-You barely make it across the pit!
+You fall into the pit and MEGA DIE!
 
-YOU WIN!
+YOU DIED!
 ]]
 return pg

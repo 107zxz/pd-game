@@ -1,21 +1,10 @@
 local pg = {}
-pg.image = "gfx/amy.png"
 pg.buttons = {
-    {label="One",action=function() CurrentScreen = DiceScreen; DiceScreen:roll() end},
-    {label="Two",action=function() print("Button two pressed!"); TextScreen:loadPage"002" end}
+    {label="DC 7 STR",action=function() CurrentScreen = DiceScreen; DiceScreen:roll(2) end},
+    {label="p.002",action=function() TextScreen:loadPage"002" end},
+    {label="p.003",action=function() TextScreen:loadPage"003" end},
 }
 pg.text = [[
-Hello, World.
-
-I am Yugi Muto.
-
-Oh dear
-
-Fuck my trap car
-
-adojsajdoa
-
-
-Hell No
+To jump to the other ledge, roll a DC 7 STR check. If you pass, turn to p.002. Otherwise, turn to p.003.
 ]]
 return pg

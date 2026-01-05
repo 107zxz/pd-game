@@ -13,12 +13,26 @@ function TextScreen()
     ts.cornerImage = gfx.image.new("gfx/cornerdeco.png")
     assert(ts.cornerImage ~= nil, "Couldn't load corner image!")
 
+    -- Menu item
+    -- ts.previous = "001"
+    -- pd.getSystemMenu():addMenuItem("Jump Back", function() ts:loadPage(ts.previous) end)
+
     function ts:updateBottomUI()
+        local totalLen = 0
+        for _, btn in ipairs(self.buttons) do
+            totalLen += GameFnt:getTextWidth(btn.label) + 14
+        end
+
+        local spacing = (200 - totalLen) / 2
+
+        local spaceAcc = 0
         for i, btn in ipairs(self.buttons) do
             local buttonWidth = GameFnt:getTextWidth(btn.label)
 
-            Button(btn.label, i * 200 / (table.getsize(self.buttons) + 1) - buttonWidth / 2, 92):update(i ==
+            Button(btn.label, spacing + spaceAcc, 92):update(i ==
                 self.selection)
+
+            spaceAcc += buttonWidth + 14
         end
     end
 
@@ -93,7 +107,7 @@ function TextScreen()
             gfx.drawText(
                 text,
                 2,
-                offsetHeight+2,
+                offsetHeight + 2,
                 portImgSize[1],
                 portImgSize[2],
                 nil,
@@ -190,7 +204,6 @@ function TextScreen()
             ch *= 3
         end
 
-
         if ch ~= 0 then
             self.scrollProgress -= ch
             self.scrollProgress = math.min(self.scrollProgress, scrollMax)
@@ -255,7 +268,7 @@ function TextScreen()
             if pd.buttonIsPressed(pd.kButtonDown) or pd.buttonIsPressed(pd.kButtonUp) then
                 ts:updateBottomUI()
             end
-            if pd.buttonJustPressed(pd.kButtonUp) or pd.buttonJustPressed(pd.kButtonDown) and scrollMin > scrollMax then
+            if (pd.buttonJustPressed(pd.kButtonUp) or pd.buttonJustPressed(pd.kButtonDown) and scrollMin > scrollMax) and #self.buttons>0 then
                 if self.selection == 0 then
                     self.selection = 1
                     gfx.setColor(gfx.kColorBlack)
@@ -270,12 +283,12 @@ function TextScreen()
             if self.selection ~= 0 then
                 if pd.buttonJustPressed(pd.kButtonLeft) then
                     -- Show buttons!
-                    self.selection = 1
+                    self.selection = math.max(self.selection - 1, 1)
                     ts:updateBottomUI()
                 end
                 if pd.buttonJustPressed(pd.kButtonRight) then
                     -- Show buttons!
-                    self.selection = 2
+                    self.selection = math.min(self.selection + 1, #self.buttons)
                     ts:updateBottomUI()
                 end
 

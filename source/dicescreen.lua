@@ -51,21 +51,20 @@ function DiceScreen()
     ---@type table
     ds.dice = {}
 
-    function ds:roll()
-        ds.dice = {
-            newDie(1),
-            newDie(2),
-            newDie(3),
-            newDie(4),
-            newDie(5),
-            newDie(6)
-        }
+    function ds:roll(nDice)
+        ds.dice = {}
+
+        for _ = 1, nDice do
+            table.insert(ds.dice, newDie(math.random(1, 6)))
+        end
+
+        self.frameCount = 0
+
+        -- Screenshot old
+        ds.screenPic = gfx.getDisplayImage()
     end
 
-    function ds:update()
-        gfx.setBackgroundColor(gfx.kColorBlack)
-
-        gfx.setColor(gfx.kColorWhite)
+    function ds:drawDice()
         for di, d in ipairs(ds.dice) do
             -- Clear old die
             --if d.otr ~= nil then
@@ -127,44 +126,91 @@ function DiceScreen()
                     end
                 end
             end
+        end
+    end
 
-            -- Momentum
-            ds.dice[di].rx += ds.dice[di].rpx
-            ds.dice[di].tx += ds.dice[di].px
+    function ds:updateTheDice()
+        self:drawDice()
+
+        -- Momentum
+        for di, d in ipairs(ds.dice) do
+            self.dice[di].rx += self.dice[di].rpx
+            self.dice[di].tx += self.dice[di].px
 
             -- Slow down!
-            ds.dice[di].rpx *= 0.9
-            ds.dice[di].px *= 0.9
+            self.dice[di].rpx *= 0.9
+            self.dice[di].px *= 0.9
 
             -- Bounce
             local bounce = false
-            if ds.dice[di].tx.x > 200 - 16 then
-                ds.dice[di].tx.x = 200 - 16
-                ds.dice[di].px.x *= -1
+            if self.dice[di].tx.x > 200 - 16 then
+                self.dice[di].tx.x = 200 - 16
+                self.dice[di].px.x *= -1
                 bounce = true
             end
-            if ds.dice[di].tx.y > 120 - 16 then
-                ds.dice[di].tx.y = 120 - 16
-                ds.dice[di].px.y *= -1
+            if self.dice[di].tx.y > 120 - 16 then
+                self.dice[di].tx.y = 120 - 16
+                self.dice[di].px.y *= -1
                 bounce = true
             end
-            if ds.dice[di].tx.x < 16 then
-                ds.dice[di].tx.x = 16
-                ds.dice[di].px.x *= -1
+            if self.dice[di].tx.x < 16 then
+                self.dice[di].tx.x = 16
+                self.dice[di].px.x *= -1
                 bounce = true
             end
-            if ds.dice[di].tx.y < 16 then
-                ds.dice[di].tx.y = 16
-                ds.dice[di].px.y *= -1
+            if self.dice[di].tx.y < 16 then
+                self.dice[di].tx.y = 16
+                self.dice[di].px.y *= -1
                 bounce = true
             end
 
             -- Bounce momentum
             if bounce then
-                ds.dice[di].px.x *= math.random(3, 4) / 4
-                ds.dice[di].px.y *= math.random(3, 4) / 4
+                self.dice[di].px.x *= math.random(3, 4) / 4
+                self.dice[di].px.y *= math.random(3, 4) / 4
             end
         end
+    end
+
+    function ds:resolveTheDice()
+        -- Lerp dice to final position
+        local dicetotal = 0
+
+        for di, dd in ipairs(self.dice) do
+            self.dice[di].tx.x = (dd.tx.x + (di - 1) * 40 + 100 + 20 - #self.dice * 20) / 2
+            self.dice[di].tx.y = (dd.tx.y + 60) / 2
+
+            self.dice[di].rx = dd.rx / 2
+
+            dicetotal += dd.pips
+        end
+        gfx.clear(gfx.kColorWhite)
+        ds:drawDice()
+
+        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+        local totalText = string.format("Total: %d", dicetotal)
+        GameFnt:drawTextAligned(totalText, 100 - GameFnt:getTextWidth(totalText) / 2, 30, gfx.kAlignCenter)
+
+        local resultText = "Strength check " .. (dicetotal > 6 and "PASS" or "FAIL")
+        GameFnt:drawTextAligned(resultText, 100 - GameFnt:getTextWidth(resultText) / 2, 85, gfx.kAlignCenter)
+    end
+
+    function ds:update()
+        gfx.setBackgroundColor(gfx.kColorBlack)
+
+        gfx.setColor(gfx.kColorWhite)
+
+        if self.frameCount < 40 then
+            self:updateTheDice()
+        elseif self.frameCount < 50 then
+            self:resolveTheDice()
+        elseif pd.buttonJustPressed(pd.kButtonA) or pd.buttonJustPressed(pd.kButtonB) then
+            CurrentScreen = TextScreen
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+            self.screenPic:draw(0, 0)
+        end
+
+        self.frameCount += 1
     end
 
     return ds
