@@ -8,8 +8,8 @@
     in
     {
       devShell = pkgs.mkShell {
-        buildInputs = with pkgs; [
-
+        packages = with pkgs; [
+            lua-language-server
         ];
         PLAYDATE_SDK_PATH="/home/amy/Downloads/PlaydateSDK-3.0.2/";
       };
