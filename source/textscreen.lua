@@ -66,9 +66,6 @@ function TextScreen()
                 if figure == nil then
                     error("Couldn't load image: " .. self.imagePath)
                 end
-            else
-                print("No imagePath in:")
-                printTable(pageObj)
             end
 
             local bonusUIHeight = 32
@@ -90,7 +87,6 @@ function TextScreen()
             gfx.pushContext(portImg)
             gfx.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
             if figure ~= nil then
-                print "Should be drawing a figure"
                 figure:draw(100 - figure.width / 2, 0)
             end
             gfx.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
@@ -183,15 +179,15 @@ function TextScreen()
         end
 
         if pd.buttonIsPressed(pd.kButtonDown) then
-            ch = 2
+            ch = 3
         end
         if pd.buttonIsPressed(pd.kButtonUp) then
-            ch = -2
+            ch = -3
         end
 
         -- Speed up
         if pd.buttonIsPressed(pd.kButtonB) then
-            ch *= 2
+            ch *= 3
         end
 
 

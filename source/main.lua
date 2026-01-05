@@ -17,11 +17,11 @@ TextScreen = TextScreen()
 TextScreen:loadPage("001")
 
 DiceScreen = DiceScreen()
-DiceScreen:roll()
+-- DiceScreen:roll()
 
---local currentScreen = TextScreen
-local currentScreen = DiceScreen
+CurrentScreen = TextScreen
+--local currentScreen = DiceScreen
 
 function pd.update()
-    currentScreen:update()
+    CurrentScreen:update()
 end
