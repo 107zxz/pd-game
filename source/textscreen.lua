@@ -177,6 +177,7 @@ function TextScreen()
         -- Page Number
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
         GameFnt:drawText(page, 100 - GameFnt:getTextWidth(page) / 2, 0)
+
     end
 
     function ts:update()
