@@ -177,48 +177,47 @@ function TextScreen()
         -- Page Number
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
         GameFnt:drawText(page, 100 - GameFnt:getTextWidth(page) / 2, 0)
-
     end
 
     function ts:update()
         local scrollMin = -self.currentPage.height + 120 - GameFnt:getHeight() * 2
         local scrollMax = 0
 
-        local _, ch = pd.getCrankChange()
-        if ch == nil then
-            ch = 0
-        end
+        if scrollMin < scrollMax then
+            local _, ch = pd.getCrankChange()
+            if ch == nil then
+                ch = 0
+            end
 
-        if math.abs(ch) < 3 and self.scrollProgress == scrollMin then
-            ch = 0
-        end
+            if math.abs(ch) < 3 and self.scrollProgress == scrollMin then
+                ch = 0
+            end
 
-        if pd.buttonIsPressed(pd.kButtonDown) then
-            ch = 3
-        end
-        if pd.buttonIsPressed(pd.kButtonUp) then
-            ch = -3
-        end
+            if pd.buttonIsPressed(pd.kButtonDown) then
+                ch = 3
+            end
+            if pd.buttonIsPressed(pd.kButtonUp) then
+                ch = -3
+            end
 
-        -- Speed up
-        if pd.buttonIsPressed(pd.kButtonB) then
-            ch *= 3
-        end
+            -- Speed up
+            if pd.buttonIsPressed(pd.kButtonB) then
+                ch *= 3
+            end
 
-        if ch ~= 0 then
-            self.scrollProgress -= ch
-            self.scrollProgress = math.min(self.scrollProgress, scrollMax)
-            self.scrollProgress = math.max(self.scrollProgress, scrollMin)
+            if ch ~= 0 then
+                self.scrollProgress -= ch
+                self.scrollProgress = math.min(self.scrollProgress, scrollMax)
+                self.scrollProgress = math.max(self.scrollProgress, scrollMin)
 
-            gfx.setClipRect(self.pageRect)
-            gfx.setColor(gfx.kColorBlack)
-            gfx.fillRect(self.pageRect)
-            gfx.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
-            self.currentPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress)
-            gfx.clearClipRect()
+                gfx.setClipRect(self.pageRect)
+                gfx.setColor(gfx.kColorBlack)
+                gfx.fillRect(self.pageRect)
+                gfx.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
+                self.currentPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress)
+                gfx.clearClipRect()
 
-            -- Scroll Arrows
-            if scrollMin < scrollMax then
+                -- Scroll Arrows
                 if self.scrollProgress < scrollMax and ch > 0 then
                     gfx.setColor(gfx.kColorBlack)
                     gfx.fillRect(64, 0, 36 * 2, GameFnt:getHeight())
@@ -269,7 +268,7 @@ function TextScreen()
             if pd.buttonIsPressed(pd.kButtonDown) or pd.buttonIsPressed(pd.kButtonUp) then
                 ts:updateBottomUI()
             end
-            if (pd.buttonJustPressed(pd.kButtonUp) or pd.buttonJustPressed(pd.kButtonDown) and scrollMin > scrollMax) and #self.buttons>0 then
+            if (pd.buttonJustPressed(pd.kButtonUp) or pd.buttonJustPressed(pd.kButtonDown) and scrollMin > scrollMax) and #self.buttons > 0 then
                 if self.selection == 0 then
                     self.selection = 1
                     gfx.setColor(gfx.kColorBlack)
