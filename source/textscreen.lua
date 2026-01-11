@@ -20,16 +20,16 @@ function TextScreen()
     function ts:updateBottomUI()
         local totalLen = 0
         for _, btn in ipairs(self.buttons) do
-            totalLen += GameFnt:getTextWidth(btn.label) + 14
+            totalLen += GameFnt:getTextWidth(btn[1]) + 14
         end
 
         local spacing = (200 - totalLen) / 2
 
-        local spaceAcc = 0
+        local spaceAcc = 7
         for i, btn in ipairs(self.buttons) do
-            local buttonWidth = GameFnt:getTextWidth(btn.label)
+            local buttonWidth = GameFnt:getTextWidth(btn[1])
 
-            Button(btn.label, spacing + spaceAcc, 92):update(i ==
+            Button(btn[1], spacing + spaceAcc, 92):update(i ==
                 self.selection)
 
             spaceAcc += buttonWidth + 14
@@ -38,15 +38,20 @@ function TextScreen()
 
     ---@param page string
     function ts:loadPage(page)
+        -- Old page for rollback
+        local oldPage = self.page
+
         self.page = page
         --- @type table
         self.buttons = {}
+        self.holdShot = nil
 
         -- Load page from disk
         local pagePath = string.format("pages/%s.pdz", page)
 
         local pageFile = pd.file.open(pagePath)
         if pageFile == nil then
+            self.page = oldPage
             error(string.format("Couldn't open pages/%s", pagePath))
         end
 
@@ -55,20 +60,22 @@ function TextScreen()
         if pageObj == nil then
             error("Could not load page object: " .. pagePath)
         end
-        local pageText = pageObj.text:match "^%s*(.-)%s*$"
+        local pageText = "\n" .. pageObj.text:match "^%s*(.-)%s*$"
         self.buttons = pageObj.buttons
         self.imagePath = pageObj.image
+
+        -- Special: Open character sheet by holding button
+        self.holdProgress = 0
 
         gfx.setColor(gfx.kColorWhite)
         gfx.setBackgroundColor(gfx.kColorBlack)
         gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 
         gfx.clear()
-        self.cornerImage:draw(0, 0)
-
-        self.cornerImage:draw(200 - self.cornerImage.width, 0, gfx.kImageFlippedX)
-        self.cornerImage:draw(0, 120 - self.cornerImage.height, gfx.kImageFlippedY)
-        self.cornerImage:draw(200 - self.cornerImage.width, 120 - self.cornerImage.height, gfx.kImageFlippedXY)
+        -- self.cornerImage:draw(0, 0)
+        -- self.cornerImage:draw(200 - self.cornerImage.width, 0, gfx.kImageFlippedX)
+        -- self.cornerImage:draw(0, 120 - self.cornerImage.height, gfx.kImageFlippedY)
+        -- self.cornerImage:draw(200 - self.cornerImage.width, 120 - self.cornerImage.height, gfx.kImageFlippedXY)
         gfx.setColor(gfx.kColorBlack)
 
         local function makePageImage(text)
@@ -99,7 +106,7 @@ function TextScreen()
 
             -- Predraw text
             gfx.pushContext(portImg)
-            gfx.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
+            gfx.setImageDrawMode(playdate.graphics.kDrawModeCopy)
             if figure ~= nil then
                 figure:draw(100 - figure.width / 2, 0)
             end
@@ -213,7 +220,7 @@ function TextScreen()
                 gfx.setClipRect(self.pageRect)
                 gfx.setColor(gfx.kColorBlack)
                 gfx.fillRect(self.pageRect)
-                gfx.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
+                gfx.setImageDrawMode(playdate.graphics.kDrawModeCopy)
                 self.currentPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress)
                 gfx.clearClipRect()
 
@@ -248,7 +255,9 @@ function TextScreen()
                     gfx.drawPolygon(95, 120 - 8, 105, 120 - 8, 100, 117)
 
                     -- Page left/right arrows
-                    self:drawPageArrows()
+                    if #self.buttons > 0 then
+                        self:drawPageArrows()
+                    end
 
                     ts:updateBottomUI()
 
@@ -280,7 +289,7 @@ function TextScreen()
                 self:drawPageArrows()
             end
 
-            if self.selection ~= 0 then
+            if self.selection ~= 0 and #self.buttons > 0 then
                 if pd.buttonJustPressed(pd.kButtonLeft) then
                     -- Show buttons!
                     self.selection = math.max(self.selection - 1, 1)
@@ -293,7 +302,7 @@ function TextScreen()
                 end
 
                 if pd.buttonJustPressed(pd.kButtonA) then
-                    self.buttons[self.selection].action()
+                    self.buttons[self.selection][2]()
                 end
             else
                 if pd.buttonJustPressed(pd.kButtonRight) and self.page ~= self.pageMax then
@@ -301,6 +310,31 @@ function TextScreen()
                 end
                 if pd.buttonJustPressed(pd.kButtonLeft) and self.page ~= "001" then
                     self:loadPage(pageRelative(-1))
+                end
+
+                -- Open character sheet by holding A
+                if pd.buttonIsPressed(pd.kButtonA) then
+                    if self.holdProgress == 30 then
+                        self.holdShot = gfx.getDisplayImage()
+                    end
+                    if self.holdProgress > 30 then
+                        gfx.setColor(gfx.kColorBlack)
+                        gfx.fillRect(40, 70, 120, 30)
+
+                        gfx.setColor(gfx.kColorWhite)
+                        gfx.fillRect(42, 72, self.holdProgress, 26)
+
+                        gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+                        GameFnt:drawText("Character\nSheet", 45, 75)
+                    end
+                    self.holdProgress += 10
+                end
+                if pd.buttonJustReleased(pd.kButtonA) then
+                    self.holdProgress = 0
+                    if self.holdShot ~= nil then
+                        gfx.setImageDrawMode(gfx.kDrawModeCopy)
+                        self.holdShot:draw(0, 0)
+                    end
                 end
             end
         else
@@ -311,6 +345,42 @@ function TextScreen()
             if pd.buttonJustPressed(pd.kButtonLeft) and self.page ~= "001" then
                 self:loadPage(pageRelative(-1))
             end
+
+            -- Open character sheet by holding A
+            if pd.buttonIsPressed(pd.kButtonA) then
+                if self.holdProgress == 30 then
+                    self.holdShot = gfx.getDisplayImage()
+                end
+                if self.holdProgress > 30 then
+                    gfx.setColor(gfx.kColorBlack)
+                    gfx.fillRect(40, 70, 120, 30)
+
+                    gfx.setColor(gfx.kColorWhite)
+                    gfx.fillRect(42, 72, self.holdProgress, 26)
+
+                    gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
+                    GameFnt:drawText("Character\nSheet", 45, 75)
+                end
+                self.holdProgress += 10
+            end
+            if pd.buttonJustReleased(pd.kButtonA) then
+                self.holdProgress = 0
+                if self.holdShot ~= nil then
+                    gfx.setImageDrawMode(gfx.kDrawModeCopy)
+                    self.holdShot:draw(0, 0)
+                end
+            end
+        end
+        if self.holdProgress >= 125 then
+            self.holdProgress = 0
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+            self.holdShot:draw(0, 0)
+            pd.display.flush()
+
+            -- Open character sheet
+            DiceScreen:roll(1)
+            CharacterSheet:open()
+            CurrentScreen = CharacterSheet
         end
     end
 

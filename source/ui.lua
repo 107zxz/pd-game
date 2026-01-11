@@ -1,6 +1,20 @@
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
+function ItemButton(item)
+    return {
+        "Collect " .. item,
+        function() CharacterSheet:addItem(item) end
+    }
+end
+
+function PageButton(page)
+    return {
+        "p." .. page,
+        function() TextScreen:loadPage(page) end
+    }
+end
+
 function Button(label, x, y)
     local btn = {}
     btn.label = label

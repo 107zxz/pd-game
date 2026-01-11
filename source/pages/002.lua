@@ -1,19 +1,16 @@
 local pg = {}
 pg.buttons = {
+    PageButton"003"
 }
+pg.image = "gfx/sky2.png"
 pg.text = [[
-You barely make it across the pit!
+Out of the corner of your eye, you see a faint light growing from your left hand side.
 
-YOU WIN!
+You try to turn your head to follow it, but you can't move your body.
 
-Spicy
+The light grows brighter.
 
-Spicy
 
-Nicey
-
-Abogus
-
-Peenus
+Turn to p.003.
 ]]
 return pg

@@ -39,7 +39,7 @@ local function newDie(pips)
     return {
         tx = geo.point.new(100 + math.random(-32, 32), 60),
         rx = 45,
-        px = geo.vector2D.new(25 * math.random(-2, 2), 25 * math.random(-2, 2)),
+        px = geo.vector2D.new(25 * math.sin(math.rad(math.random(0, 360))), 25 * math.cos(math.rad(math.random(0, 360)))),
         rpx = math.random(-64, 64),
         pips = pips
     }
@@ -50,9 +50,12 @@ function DiceScreen()
 
     ---@type table
     ds.dice = {}
+    ds.cornerImage = gfx.image.new("gfx/cornerdeco.png")
 
-    function ds:roll(nDice)
+    function ds:roll(nDice, target, skill)
         ds.dice = {}
+        self.targetScore = target
+        self.skillModifier = skill
 
         for _ = 1, nDice do
             table.insert(ds.dice, newDie(math.random(1, 6)))
@@ -133,7 +136,7 @@ function DiceScreen()
         self:drawDice()
 
         -- Momentum
-        for di, d in ipairs(ds.dice) do
+        for di = 1, #self.dice do
             self.dice[di].rx += self.dice[di].rpx
             self.dice[di].tx += self.dice[di].px
 
@@ -187,12 +190,26 @@ function DiceScreen()
         gfx.clear(gfx.kColorWhite)
         ds:drawDice()
 
+        local rollText = string.format("Total: %d", dicetotal)
+        local skillBonus = 0
+        if self.skillModifier ~= nil then
+            skillBonus = CharacterSheet:getStat(self.skillModifier)
+            rollText = rollText .. "+" .. skillBonus
+        end
+        if self.targetScore ~= nil then
+            rollText = rollText ..
+            string.format(
+            (dicetotal + skillBonus == self.targetScore and " = %d") or (dicetotal + skillBonus > self.targetScore and " > %d") or
+            (" < %d"), self.targetScore)
+        end
         gfx.setImageDrawMode(gfx.kDrawModeFillBlack)
-        local totalText = string.format("Total: %d", dicetotal)
-        GameFnt:drawTextAligned(totalText, 100 - GameFnt:getTextWidth(totalText) / 2, 30, gfx.kAlignCenter)
+        GameFnt:drawTextAligned(rollText, 100 - GameFnt:getTextWidth(rollText) / 2, 30, gfx.kAlignCenter)
 
-        local resultText = "Strength check " .. (dicetotal > 6 and "PASS" or "FAIL")
-        GameFnt:drawTextAligned(resultText, 100 - GameFnt:getTextWidth(resultText) / 2, 85, gfx.kAlignCenter)
+        if self.targetScore ~= nil then
+            local resultText = self.skillModifier ..
+            " check " .. (dicetotal + skillBonus >= self.targetScore and "PASS" or "FAIL")
+            GameFnt:drawTextAligned(resultText, 100 - GameFnt:getTextWidth(resultText) / 2, 85, gfx.kAlignCenter)
+        end
     end
 
     function ds:update()
