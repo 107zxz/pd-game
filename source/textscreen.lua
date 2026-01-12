@@ -108,14 +108,14 @@ function TextScreen()
             gfx.pushContext(portImg)
             gfx.setImageDrawMode(playdate.graphics.kDrawModeCopy)
             if figure ~= nil then
-                figure:draw(100 - figure.width / 2, 0)
+                figure:draw(100 - figure.width / 2 - GameFnt:getGlyph" ".width, 0)
             end
             gfx.setImageDrawMode(playdate.graphics.kDrawModeFillWhite)
             gfx.drawText(
                 text,
                 2,
                 offsetHeight + 2,
-                portImgSize[1],
+                portImgSize[1]-2,
                 portImgSize[2],
                 nil,
                 gfx.kWrapWord,

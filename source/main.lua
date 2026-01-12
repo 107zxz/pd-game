@@ -15,7 +15,6 @@ if saveDat == nil then
 end
 
 pd.display.setScale(2)
---pd.display.setRefreshRate(50)
 
 GameFnt = gfx.font.new("fonts/topaz_serif_8")
 gfx.setFont(GameFnt)
@@ -24,7 +23,6 @@ TextScreen = TextScreen()
 TextScreen:loadPage(saveDat.page)
 
 DiceScreen = DiceScreen()
--- DiceScreen:roll()
 
 CharacterSheet = CharacterSheet()
 

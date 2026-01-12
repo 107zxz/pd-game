@@ -8,6 +8,7 @@ function ItemButton(item)
     }
 end
 
+--- @param page string
 function PageButton(page)
     return {
         "p." .. page,
