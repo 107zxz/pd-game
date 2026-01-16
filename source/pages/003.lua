@@ -1,9 +1,9 @@
 local pg = {}
 pg.buttons = {
-    PageButton"004"
+    PageButton"004",
 }
 pg.image = "gfx/sky3.png"
-pg.text = [[
+pg.text = [[ 
 You can see what the source of the light is now.
 
 It's the Moon.
@@ -14,5 +14,6 @@ It leaves your vision again faster than it arrived.
 
 
 Turn to p.004
+
 ]]
 return pg

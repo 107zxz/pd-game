@@ -1,9 +1,9 @@
 local pg = {}
 pg.buttons = {
-    PageButton"005"
+    PageButton"005",
 }
 pg.image = "gfx/sky4.png"
-pg.text = [[
+pg.text = [[ 
 The moon appears again in a matter of seconds.
 
 It spins faster and faster, forming a bright white gash across the sky.
@@ -14,5 +14,6 @@ You finally manage to blink.
 
 
 Turn to p.005
+
 ]]
 return pg

@@ -2,6 +2,8 @@ local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
 function pd.gameWillPause()
+    gfx.setColor(gfx.kColorBlack)
+    gfx.setBackgroundColor(gfx.kColorBlack)
     local pauseImage = gfx.image.new(200, 120, gfx.kColorBlack)
     gfx.pushContext(pauseImage)
     CharacterSheet:drawStats()
@@ -23,6 +25,8 @@ function CharacterSheet()
     }
     cs.columnSelected = 1
     cs.statSelected = 1
+
+    pd.getSystemMenu():addMenuItem("sheet", function() CurrentScreen = CharacterSheet; CharacterSheet:open() end)
 
     function cs:addItem(itemName)
         for i, v in ipairs(self.items) do
@@ -76,6 +80,7 @@ function CharacterSheet()
     end
 
     function cs:drawStats()
+        gfx.setColor(gfx.kColorBlack)
         gfx.fillRect(6, 7, 188, 107)
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
         local statsText = "Stats:"

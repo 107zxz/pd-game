@@ -1,4 +1,4 @@
-local pd <const> = playdate
+-- local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
 function ItemButton(item)
@@ -12,7 +12,7 @@ end
 function PageButton(page)
     return {
         "p." .. page,
-        function() TextScreen:loadPage(page) end
+        function() TextScreen:loadPage(page) end,
     }
 end
 

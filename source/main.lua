@@ -4,6 +4,7 @@ import "CoreLibs/ui"
 import "textscreen"
 import "dicescreen"
 import "charsheet"
+import "pagejump"
 
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
@@ -20,13 +21,12 @@ GameFnt = gfx.font.new("fonts/topaz_serif_8")
 gfx.setFont(GameFnt)
 
 TextScreen = TextScreen()
-TextScreen:loadPage(saveDat.page)
-
 DiceScreen = DiceScreen()
-
 CharacterSheet = CharacterSheet()
+PageJump = PageJump()
 
 CurrentScreen = TextScreen
+TextScreen:loadPage(saveDat.page)
 
 function pd.update()
     CurrentScreen:update()

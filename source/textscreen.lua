@@ -7,15 +7,39 @@ import "ui"
 local pd <const> = playdate
 local gfx <const> = playdate.graphics
 
+local function makeStarImage(w, h)
+    local function makeStar()
+        local x = math.random(0,w)
+        local y = math.random(0,h)
+
+        gfx.drawPixel(x, y)
+    end
+
+    local starImage = gfx.image.new(w, h, gfx.kColorClear)
+
+    gfx.pushContext(starImage)
+
+    gfx.setColor(gfx.kColorWhite)
+
+    for _ = 1,50 do
+        makeStar()
+    end
+
+    gfx.popContext()
+
+    return starImage
+end
+
 function TextScreen()
     local ts = {}
 
-    ts.cornerImage = gfx.image.new("gfx/cornerdeco.png")
-    assert(ts.cornerImage ~= nil, "Couldn't load corner image!")
+    -- ts.cornerImage = gfx.image.new("gfx/cornerdeco.png")
+    -- assert(ts.cornerImage ~= nil, "Couldn't load corner image!")
 
     -- Menu item
     -- ts.previous = "001"
-    -- pd.getSystemMenu():addMenuItem("Jump Back", function() ts:loadPage(ts.previous) end)
+    ts.stars = true
+    pd.getSystemMenu():addCheckmarkMenuItem("Stars", true, function(es) ts.stars = es end)
 
     function ts:updateBottomUI()
         local totalLen = 0
@@ -60,7 +84,7 @@ function TextScreen()
         if pageObj == nil then
             error("Could not load page object: " .. pagePath)
         end
-        local pageText = "\n" .. pageObj.text:match "^%s*(.-)%s*$"
+        local pageText = "\n" .. pageObj.text:match "^%s*(.-)%s*$" .. "\n"
         self.buttons = pageObj.buttons
         self.imagePath = pageObj.image
 
@@ -72,10 +96,6 @@ function TextScreen()
         gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 
         gfx.clear()
-        -- self.cornerImage:draw(0, 0)
-        -- self.cornerImage:draw(200 - self.cornerImage.width, 0, gfx.kImageFlippedX)
-        -- self.cornerImage:draw(0, 120 - self.cornerImage.height, gfx.kImageFlippedY)
-        -- self.cornerImage:draw(200 - self.cornerImage.width, 120 - self.cornerImage.height, gfx.kImageFlippedXY)
         gfx.setColor(gfx.kColorBlack)
 
         local function makePageImage(text)
@@ -148,6 +168,7 @@ function TextScreen()
         end
 
         self.currentPage = makePageImage(pageText)
+        self.starPage = makeStarImage(self.currentPage.width, self.currentPage.height)
 
         local scrollMin = -self.currentPage.height + 120 - GameFnt:getHeight() * 2
         local scrollMax = 0
@@ -165,9 +186,16 @@ function TextScreen()
             120 - GameFnt:getHeight() * 2
         )
 
+        gfx.setColor(gfx.kColorBlack)
         gfx.setClipRect(self.pageRect)
         gfx.fillRect(self.pageRect)
+        gfx.setImageDrawMode(gfx.kDrawModeCopy)
         self.currentPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress)
+        -- gfx.setImageDrawMode(playdate.graphics.kDrawModeXOR)
+        if ts.stars then
+            self.starPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress/2)
+        end
+        -- self.starPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress*1.5)
         gfx.clearClipRect()
 
         gfx.setColor(gfx.kColorWhite)
@@ -222,6 +250,12 @@ function TextScreen()
                 gfx.fillRect(self.pageRect)
                 gfx.setImageDrawMode(playdate.graphics.kDrawModeCopy)
                 self.currentPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress)
+                -- gfx.setImageDrawMode(playdate.graphics.kDrawModeXOR)
+                if ts.stars then
+                    self.starPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress/2)
+                end
+                -- self.starPage:draw(GameFnt:getGlyph ' '.width, GameFnt:getHeight() + self.scrollProgress*1.5)
+
                 gfx.clearClipRect()
 
                 -- Scroll Arrows
